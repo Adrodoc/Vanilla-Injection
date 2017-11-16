@@ -37,15 +37,12 @@ import javax.annotation.concurrent.ThreadSafe;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.util.Integers;
 
 import com.energyxxer.inject.InjectionBuffer.InjectionType;
 import com.energyxxer.inject.structure.Command;
 import com.energyxxer.log.MinecraftLogObserver;
 import com.energyxxer.log.SuccessEvent;
 import com.energyxxer.log.SuccessListener;
-import com.google.common.base.Charsets;
-import com.google.common.primitives.Ints;
 
 import de.adrodoc55.common.util.CheckedConsumer;
 import de.adrodoc55.minecraft.coordinate.Vec3I;
@@ -106,7 +103,7 @@ public class InjectionConnection implements AutoCloseable {
   private final Path structureDir;
   /**
    * The file used to persist the {@link #structureId}. This is a file in the {@link #structureDir}
-   * called "inject/<i>{@link #identifier}</i>/data.txt".
+   * called "inject/<i>{@link #identifier}</i>/data.bin".
    */
   private final Path dataFile;
   private @Nullable FileChannel dataFileChannel;
@@ -203,7 +200,7 @@ public class InjectionConnection implements AutoCloseable {
     logObserver = new MinecraftLogObserver(logFile);
     injectionBuffer = new InjectionBuffer(this::getStructureName);
     structureDir = worldDir.resolve("structures");
-    dataFile = structureDir.resolve(getStructureNamePrefix() + "data.txt");
+    dataFile = structureDir.resolve(getStructureNamePrefix() + "data.bin");
     open(acquire);
   }
 
@@ -328,10 +325,9 @@ public class InjectionConnection implements AutoCloseable {
    * @throws IOException if an I/O error occurs while reading {@link #dataFile}
    */
   private int loadStructureId() throws IOException {
-    ByteBuffer buffer = ByteBuffer.allocate(Ints.checkedCast(dataFileChannel.size()));
+    ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
     dataFileChannel.read(buffer);
-    String fileContent = new String(buffer.array(), Charsets.UTF_8);
-    return Integers.parseInt(fileContent);
+    return buffer.getInt(0);
   }
 
   /**
@@ -341,9 +337,9 @@ public class InjectionConnection implements AutoCloseable {
    * @throws IOException if an I/O error occurs while writing to {@link #dataFile}
    */
   private void saveStructureId(int structureId) throws IOException {
-    dataFileChannel.position(0);
-    dataFileChannel.write(Charsets.UTF_8.encode(String.valueOf(structureId + 1)));
-    dataFileChannel.truncate(dataFileChannel.position());
+    ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
+    buffer.putInt(0, structureId);
+    dataFileChannel.write(buffer, 0);
   }
 
   @Override
@@ -544,7 +540,7 @@ public class InjectionConnection implements AutoCloseable {
     structure.writeTo(getStructureFile(structureId).toFile());
     // Don't increment if no structure was written
     this.structureId.incrementAndGet();
-    saveStructureId(structureId);
+    saveStructureId(structureId + 1);
   }
 
   /**
