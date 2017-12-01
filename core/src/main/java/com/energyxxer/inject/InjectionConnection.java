@@ -71,7 +71,7 @@ public class InjectionConnection implements AutoCloseable {
   /**
    * A command that is always successful and ideally does not disturb the player.
    */
-  private static final String SUCCESSFUL_COMMAND = "gamerule logAdminCommands true";
+  private static final String SUCCESSFUL_COMMAND = "gamerule commandBlockOutput true";
   /**
    * See {@link #isTimedOut()}.
    */
