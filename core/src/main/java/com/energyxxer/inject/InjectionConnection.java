@@ -101,7 +101,7 @@ public class InjectionConnection implements AutoCloseable {
   private final String identifier;
   /**
    * The {@link Structure} directory of the Minecraft world. This is a subdirectory of
-   * {@link #worldDir} called "structures".
+   * {@link #worldDir} called "generated/minecraft/structures".
    */
   private final Path structureDir;
   /**
@@ -202,7 +202,7 @@ public class InjectionConnection implements AutoCloseable {
     logger = LogManager.getLogger(toString());
     logObserver = new MinecraftLogObserver(logFile);
     injectionBuffer = new InjectionBuffer(this::getStructureName);
-    structureDir = worldDir.resolve("structures");
+    structureDir = worldDir.resolve("generated/minecraft/structures");
     dataFile = structureDir.resolve(getStructureNamePrefix() + "data.txt");
     open(acquire);
   }
