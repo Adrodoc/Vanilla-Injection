@@ -313,7 +313,7 @@ public class InjectionBuffer {
 
     if (!minecartCommands.isEmpty()) {
       minecartCommands.add(new Command(
-          "kill @e[type=commandblock_minecart,dy=0,tag=" + getStructureName(structureId) + "]"));
+          "kill @e[type=commandblock_minecart,dy=0,tag=" + getMinecartTag(structureId) + "]"));
     }
     for (Command command : minecartCommands) {
       structure.addEntity(newCommandBlockMinecart(structureId, command));
@@ -339,8 +339,12 @@ public class InjectionBuffer {
 
   private CommandBlockMinecart newCommandBlockMinecart(int structureId, Command command) {
     CommandBlockMinecart result = new CommandBlockMinecart(command, MINECART_POS);
-    result.addTag(getStructureName(structureId));
+    result.addTag(getMinecartTag(structureId));
     return result;
+  }
+
+  private String getMinecartTag(int structureId) {
+    return getStructureName(structureId).replace('/', '-');
   }
 
   private Collection<CommandBlock> createCommandBlocks(Type type, Vec3I start, Vec3I size,
